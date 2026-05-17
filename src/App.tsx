@@ -15,8 +15,9 @@ import { FAQ } from './pages/FAQ';
 import { Policy } from './pages/Policy';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
+import { AdminPortal } from './pages/AdminPortal';
 
-const AUTH_ROUTES = ['/login', '/signup'];
+const FULLSCREEN_ROUTES = ['/login', '/signup', '/admin'];
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -28,11 +29,11 @@ function ScrollToTop() {
 
 function AppLayout() {
   const { pathname } = useLocation();
-  const isAuthRoute = AUTH_ROUTES.includes(pathname);
+  const isFullscreen = FULLSCREEN_ROUTES.some(r => pathname === r || pathname.startsWith(r + '/'));
 
   return (
     <div className="flex flex-col min-h-screen">
-      {!isAuthRoute && <Navigation />}
+      {!isFullscreen && <Navigation />}
       <Toaster position="top-right" expand={false} richColors />
       <main className="flex-grow">
         <Routes>
@@ -51,10 +52,11 @@ function AppLayout() {
           <Route path="/shipping-returns" element={<Policy title="Shipping & Returns" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/admin" element={<AdminPortal />} />
         </Routes>
       </main>
-      {!isAuthRoute && <Footer />}
-      {!isAuthRoute && <WhatsAppCTA />}
+      {!isFullscreen && <Footer />}
+      {!isFullscreen && <WhatsAppCTA />}
     </div>
   );
 }
