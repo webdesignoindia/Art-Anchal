@@ -1,0 +1,6 @@
+{
+  "name": "Art & Anchal",
+  "description": "Art & Anchal is a modern Indian luxury saree house curating timeless Banarasi craftsmanship for women who value heritage, elegance, and refined contemporary style.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
