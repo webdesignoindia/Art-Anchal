@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Navigation, Footer, WhatsAppCTA } from './components/Navigation';
+import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from 'sonner';
 import { Home } from './pages/Home';
 import { Collections } from './pages/Collections';
@@ -61,8 +62,10 @@ function AppLayout() {
 export default function App() {
   return (
     <Router>
-      <ScrollToTop />
-      <AppLayout />
+      <AuthProvider>
+        <ScrollToTop />
+        <AppLayout />
+      </AuthProvider>
     </Router>
   );
 }

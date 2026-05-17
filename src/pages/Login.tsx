@@ -1,10 +1,33 @@
 import { motion } from 'motion/react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { supabase } from '@/src/lib/supabase';
+import { toast } from 'sonner';
 
 export function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      toast.error('Please fill in all fields.');
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success('Welcome back.');
+      navigate('/');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-primary-ivory flex">
@@ -43,7 +66,6 @@ export function Login() {
           transition={{ duration: 0.8 }}
           className="w-full max-w-md"
         >
-          {/* Mobile Logo */}
           <div className="lg:hidden mb-16 text-center">
             <Link to="/" className="inline-flex flex-col items-center">
               <span className="font-accent text-2xl tracking-[0.3em] font-bold text-primary-charcoal">
@@ -60,7 +82,7 @@ export function Login() {
             <h1 className="text-4xl font-serif italic text-primary-charcoal">Sign In</h1>
           </div>
 
-          <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-8" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-[0.3em] text-primary-charcoal/60">
                 Email Address
@@ -68,6 +90,9 @@ export function Login() {
               <input
                 type="email"
                 placeholder="your@email.com"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-transparent border-b border-primary-charcoal/20 py-3 text-sm text-primary-charcoal placeholder:text-primary-charcoal/30 focus:outline-none focus:border-primary-gold transition-colors"
               />
             </div>
@@ -80,6 +105,9 @@ export function Login() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-transparent border-b border-primary-charcoal/20 py-3 text-sm text-primary-charcoal placeholder:text-primary-charcoal/30 focus:outline-none focus:border-primary-gold transition-colors pr-10"
                 />
                 <button
@@ -92,13 +120,7 @@ export function Login() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div className="w-4 h-4 border border-primary-charcoal/20 group-hover:border-primary-gold transition-colors flex items-center justify-center">
-                  <div className="w-2 h-2 bg-primary-gold hidden" />
-                </div>
-                <span className="text-[10px] uppercase tracking-widest text-primary-charcoal/50">Remember me</span>
-              </label>
+            <div className="flex items-center justify-end">
               <button type="button" className="text-[10px] uppercase tracking-widest text-primary-gold hover:text-primary-charcoal transition-colors">
                 Forgot password?
               </button>
@@ -106,19 +128,17 @@ export function Login() {
 
             <button
               type="submit"
-              className="w-full bg-primary-charcoal text-primary-ivory py-4 text-[10px] uppercase tracking-[0.4em] font-bold hover:bg-primary-maroon transition-colors duration-500 mt-4"
+              disabled={loading}
+              className="w-full bg-primary-charcoal text-primary-ivory py-4 text-[10px] uppercase tracking-[0.4em] font-bold hover:bg-primary-maroon transition-colors duration-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
 
           <div className="mt-12 pt-8 border-t border-primary-charcoal/10 text-center">
             <p className="text-[10px] uppercase tracking-widest text-primary-charcoal/40">
               New to Art & Anchal?{' '}
-              <Link
-                to="/signup"
-                className="text-primary-gold hover:text-primary-maroon transition-colors"
-              >
+              <Link to="/signup" className="text-primary-gold hover:text-primary-maroon transition-colors">
                 Create an Account
               </Link>
             </p>

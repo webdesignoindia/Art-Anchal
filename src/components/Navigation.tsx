@@ -1,25 +1,37 @@
 import { motion } from 'motion/react';
-import { ShoppingBag, Search, Menu, X, MessageSquare, User } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Search, Menu, X, MessageSquare, User, LogOut } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { NAV_LINKS } from '@/src/lib/constants';
 import { cn } from '@/lib/utils';
 import { CartSheet } from './CartSheet';
+import { useAuth } from '@/src/contexts/AuthContext';
 
 export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   const isHeroPage = location.pathname === '/';
   const isTransparent = isHeroPage && !isScrolled;
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 60);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 60);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const linkClass = cn(
@@ -89,9 +101,58 @@ export function Navigation() {
             <button className={iconClass}>
               <Search className="w-[18px] h-[18px]" />
             </button>
-            <Link to="/login" className={iconClass}>
-              <User className="w-[18px] h-[18px]" />
-            </Link>
+
+            {/* User Menu */}
+            <div className="relative" ref={userMenuRef}>
+              <button
+                className={iconClass}
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+              >
+                <User className="w-[18px] h-[18px]" />
+              </button>
+              {userMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  className="absolute right-0 top-full mt-4 w-52 bg-primary-ivory border border-primary-gold/20 shadow-xl z-50"
+                >
+                  {user ? (
+                    <>
+                      <div className="px-5 py-4 border-b border-primary-gold/10">
+                        <p className="text-[10px] uppercase tracking-widest text-primary-gold mb-1">Signed In</p>
+                        <p className="text-xs text-primary-charcoal truncate">{user.user_metadata?.first_name || user.email}</p>
+                      </div>
+                      <button
+                        onClick={() => { signOut(); setUserMenuOpen(false); }}
+                        className="w-full flex items-center gap-3 px-5 py-4 text-[10px] uppercase tracking-widest text-primary-charcoal/60 hover:text-primary-maroon hover:bg-primary-beige/30 transition-colors"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        Sign Out
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to="/login"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="block px-5 py-4 text-[10px] uppercase tracking-widest text-primary-charcoal hover:text-primary-gold hover:bg-primary-beige/30 transition-colors border-b border-primary-gold/10"
+                      >
+                        Sign In
+                      </Link>
+                      <Link
+                        to="/signup"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="block px-5 py-4 text-[10px] uppercase tracking-widest text-primary-charcoal hover:text-primary-gold hover:bg-primary-beige/30 transition-colors"
+                      >
+                        Create Account
+                      </Link>
+                    </>
+                  )}
+                </motion.div>
+              )}
+            </div>
+
             <div className={iconClass}>
               <CartSheet />
             </div>
