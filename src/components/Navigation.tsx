@@ -1,15 +1,9 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { motion } from 'motion/react';
-import { ShoppingBag, Search, Menu, X, MessageSquare } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X, MessageSquare, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { NAV_LINKS } from '@/src/lib/constants';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { CartSheet } from './CartSheet';
 
 export function Navigation() {
@@ -17,30 +11,52 @@ export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
+  const isHeroPage = location.pathname === '/';
+  const isTransparent = isHeroPage && !isScrolled;
+
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 60);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const linkClass = cn(
+    'text-xs uppercase tracking-[0.2em] font-medium transition-colors duration-300',
+    isTransparent
+      ? 'text-primary-ivory/90 hover:text-primary-gold'
+      : 'text-primary-charcoal hover:text-primary-gold'
+  );
+
+  const logoMainClass = cn(
+    'font-accent text-2xl md:text-3xl tracking-[0.3em] font-bold transition-colors duration-500',
+    isTransparent
+      ? 'text-primary-ivory group-hover:text-primary-gold'
+      : 'text-primary-charcoal group-hover:text-primary-maroon'
+  );
+
+  const iconClass = cn(
+    'transition-colors duration-300',
+    isTransparent
+      ? 'text-primary-ivory/90 hover:text-primary-gold'
+      : 'text-primary-charcoal hover:text-primary-maroon'
+  );
 
   return (
     <nav
       className={cn(
-        'fixed top-0 left-0 w-full z-50 transition-all duration-500 ease-in-out px-6 md:px-12 py-6',
-        isScrolled ? 'bg-primary-ivory/90 backdrop-blur-md border-b border-primary-gold/20 py-4' : 'bg-transparent'
+        'fixed top-0 left-0 w-full z-50 transition-all duration-500 ease-in-out px-6 md:px-12',
+        isScrolled
+          ? 'bg-primary-ivory/95 backdrop-blur-md border-b border-primary-gold/20 py-4 shadow-sm'
+          : 'bg-transparent py-6'
       )}
     >
       <div className="max-w-screen-2xl mx-auto flex items-center justify-between">
         {/* Desktop Links Left */}
         <div className="hidden lg:flex items-center space-x-10">
           {NAV_LINKS.slice(0, 2).map((link) => (
-            <Link
-              key={link.href}
-              to={link.href}
-              className="text-xs uppercase tracking-[0.2em] font-medium hover:text-primary-gold transition-colors"
-            >
+            <Link key={link.href} to={link.href} className={linkClass}>
               {link.name}
             </Link>
           ))}
@@ -48,10 +64,13 @@ export function Navigation() {
 
         {/* Brand Logo */}
         <Link to="/" className="flex flex-col items-center group">
-          <span className="font-accent text-2xl md:text-3xl tracking-[0.3em] font-bold text-primary-charcoal group-hover:text-primary-maroon transition-colors duration-500">
+          <span className={logoMainClass}>
             ART & ANCHAL
           </span>
-          <span className="text-[10px] uppercase tracking-[0.5em] mt-1 text-primary-gold/80">
+          <span className={cn(
+            'text-[10px] uppercase tracking-[0.5em] mt-1 transition-colors duration-300',
+            isTransparent ? 'text-primary-gold/80' : 'text-primary-gold/70'
+          )}>
             Heritage Banaras
           </span>
         </Link>
@@ -59,28 +78,34 @@ export function Navigation() {
         {/* Desktop Links Right */}
         <div className="hidden lg:flex items-center space-x-10">
           {NAV_LINKS.slice(2).map((link) => (
-            <Link
-              key={link.href}
-              to={link.href}
-              className="text-xs uppercase tracking-[0.2em] font-medium hover:text-primary-gold transition-colors"
-            >
+            <Link key={link.href} to={link.href} className={linkClass}>
               {link.name}
             </Link>
           ))}
-          <div className="flex items-center space-x-6 pl-6 border-l border-primary-gold/30">
-            <button className="hover:text-primary-maroon transition-colors">
-              <Search className="w-5 h-5" />
+          <div className={cn(
+            'flex items-center space-x-5 pl-6 border-l transition-colors duration-300',
+            isTransparent ? 'border-primary-ivory/30' : 'border-primary-gold/30'
+          )}>
+            <button className={iconClass}>
+              <Search className="w-[18px] h-[18px]" />
             </button>
-            <CartSheet />
+            <Link to="/login" className={iconClass}>
+              <User className="w-[18px] h-[18px]" />
+            </Link>
+            <div className={iconClass}>
+              <CartSheet />
+            </div>
           </div>
         </div>
 
         {/* Mobile Toggle */}
         <button
-          className="lg:hidden"
+          className={cn('lg:hidden', iconClass)}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
-          {isMobileMenuOpen ? <X className="w-6 h-6 text-primary-charcoal" /> : <Menu className="w-6 h-6 text-primary-charcoal" />}
+          {isMobileMenuOpen
+            ? <X className="w-6 h-6" />
+            : <Menu className="w-6 h-6" />}
         </button>
       </div>
 
@@ -89,7 +114,7 @@ export function Navigation() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: isMobileMenuOpen ? 1 : 0, y: isMobileMenuOpen ? 0 : -20 }}
         className={cn(
-          'absolute top-full left-0 w-full bg-primary-ivory border-b border-primary-gold/20 flex flex-col items-center py-12 space-y-8 lg:hidden transition-all',
+          'absolute top-full left-0 w-full bg-primary-ivory border-b border-primary-gold/20 flex flex-col items-center py-12 space-y-8 lg:hidden',
           isMobileMenuOpen ? 'block' : 'hidden'
         )}
       >
@@ -98,13 +123,17 @@ export function Navigation() {
             key={link.href}
             to={link.href}
             onClick={() => setIsMobileMenuOpen(false)}
-            className="text-sm uppercase tracking-[0.3em] font-medium"
+            className="text-sm uppercase tracking-[0.3em] font-medium text-primary-charcoal hover:text-primary-gold transition-colors"
           >
             {link.name}
           </Link>
         ))}
-        <div className="flex space-x-8 pt-4">
-          <Search className="w-6 h-6" />
+        <div className="flex space-x-8 pt-4 border-t border-primary-gold/20 w-full justify-center">
+          <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="text-xs uppercase tracking-widest text-primary-charcoal hover:text-primary-gold transition-colors">Sign In</Link>
+          <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)} className="text-xs uppercase tracking-widest text-primary-charcoal hover:text-primary-gold transition-colors">Join</Link>
+        </div>
+        <div className="flex space-x-8">
+          <Search className="w-5 h-5 text-primary-charcoal" />
           <CartSheet />
         </div>
       </motion.div>
@@ -126,19 +155,19 @@ export function Footer() {
           <div>
             <h4 className="text-[10px] uppercase tracking-[0.4em] text-primary-gold mb-8">Navigation</h4>
             <ul className="space-y-4 text-sm font-light">
-              <li><Link to="/collections">Collections</Link></li>
-              <li><Link to="/about">Our Story</Link></li>
-              <li><Link to="/craftsmanship">The Craft</Link></li>
-              <li><Link to="/journal">Journal</Link></li>
+              <li><Link to="/collections" className="hover:text-primary-gold transition-colors">Collections</Link></li>
+              <li><Link to="/about" className="hover:text-primary-gold transition-colors">Our Story</Link></li>
+              <li><Link to="/craftsmanship" className="hover:text-primary-gold transition-colors">The Craft</Link></li>
+              <li><Link to="/journal" className="hover:text-primary-gold transition-colors">Journal</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="text-[10px] uppercase tracking-[0.4em] text-primary-gold mb-8">Concierge</h4>
             <ul className="space-y-4 text-sm font-light">
-              <li><Link to="/bridal-concierge">Bridal Consultation</Link></li>
-              <li><Link to="/contact">Contact Us</Link></li>
-              <li><Link to="/faq">Frequently Asked Questions</Link></li>
-              <li><Link to="/shipping-returns">Shipping & Returns</Link></li>
+              <li><Link to="/bridal-concierge" className="hover:text-primary-gold transition-colors">Bridal Consultation</Link></li>
+              <li><Link to="/contact" className="hover:text-primary-gold transition-colors">Contact Us</Link></li>
+              <li><Link to="/faq" className="hover:text-primary-gold transition-colors">Frequently Asked Questions</Link></li>
+              <li><Link to="/shipping-returns" className="hover:text-primary-gold transition-colors">Shipping & Returns</Link></li>
             </ul>
           </div>
           <div>
@@ -150,7 +179,7 @@ export function Footer() {
                 placeholder="EMAIL ADDRESS"
                 className="bg-transparent border-b border-primary-ivory/20 py-2 text-xs w-full focus:outline-none focus:border-primary-gold transition-colors"
               />
-              <Button variant="ghost" className="text-xs uppercase tracking-widest text-primary-gold px-0">Join</Button>
+              <button className="text-xs uppercase tracking-widest text-primary-gold px-0 hover:text-primary-ivory transition-colors">Join</button>
             </div>
           </div>
         </div>
@@ -159,8 +188,8 @@ export function Footer() {
             © 2026 ART & ANCHAL. ALL RIGHTS RESERVED.
           </p>
           <div className="flex space-x-12">
-            <Link to="/privacy" className="text-[10px] uppercase tracking-[0.2em] text-primary-ivory/40 hover:text-primary-gold">Privacy Policy</Link>
-            <Link to="/terms" className="text-[10px] uppercase tracking-[0.2em] text-primary-ivory/40 hover:text-primary-gold">Terms of Service</Link>
+            <Link to="/privacy" className="text-[10px] uppercase tracking-[0.2em] text-primary-ivory/40 hover:text-primary-gold transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="text-[10px] uppercase tracking-[0.2em] text-primary-ivory/40 hover:text-primary-gold transition-colors">Terms of Service</Link>
           </div>
         </div>
       </div>
